@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi Berhasil - {{ config('app.name') }}</title>
+    <title>Berhasil Masuk - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -66,9 +66,14 @@
             color: #a5b4fc;
             font-weight: 600;
         }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
         .btn {
             display: inline-block;
-            margin-top: 2rem;
             padding: 0.8rem 2rem;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-radius: 0.75rem;
@@ -78,8 +83,24 @@
             font-size: 0.95rem;
             transition: opacity 0.2s, transform 0.15s;
             box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
         }
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #94a3b8;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #f1f5f9;
+            background: rgba(255,255,255,0.05);
+        }
+        .logout-form { width: 100%; }
     </style>
 </head>
 <body>
@@ -87,8 +108,16 @@
     <div class="icon">✓</div>
     <h1>Selamat Datang!</h1>
     <p>Hei, <span class="username">{{ Auth::user()->name }}</span>!</p>
-    <p>Akun Anda berhasil dibuat. Anda sudah masuk ke sistem.</p>
-    <a href="/" class="btn">Ke Halaman Utama</a>
+    <p>Anda sudah berhasil masuk ke sistem.</p>
+
+    <div class="btn-group">
+        <a href="{{ url('/') }}" class="btn">Ke Halaman Utama</a>
+
+        <form class="logout-form" method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-outline">Keluar (Logout)</button>
+        </form>
+    </div>
 </div>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Daftar akun baru untuk mengakses layanan kami.">
-    <title>Daftar Akun - {{ config('app.name') }}</title>
+    <meta name="description" content="Masuk ke akun Anda untuk mengakses layanan kami.">
+    <title>Masuk - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -54,7 +54,7 @@
             border-radius: 1.5rem;
             padding: 2.5rem 2rem;
             width: 100%;
-            max-width: 460px;
+            max-width: 420px;
             position: relative;
             z-index: 1;
             animation: fadeUp 0.5s ease;
@@ -101,6 +101,21 @@
             margin-bottom: 2rem;
         }
 
+        /* Alert sukses (setelah redirect dari tempat lain) */
+        .alert-success {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+            color: #86efac;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        /* Alert error umum */
         .alert-error {
             background: rgba(239,68,68,0.1);
             border: 1px solid rgba(239,68,68,0.3);
@@ -141,9 +156,9 @@
             pointer-events: none;
         }
 
-        input[type="text"],
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="text"] {
             width: 100%;
             background: var(--input-bg);
             border: 1px solid var(--border);
@@ -192,26 +207,43 @@
 
         .toggle-password:hover { color: var(--text); }
 
-        .strength-bar {
-            height: 4px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 0.5rem;
-            overflow: hidden;
+        /* Remember me + lupa password row */
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
         }
 
-        .strength-fill {
-            height: 100%;
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.3s, background 0.3s;
-        }
-
-        .strength-label {
-            font-size: 0.75rem;
+        .remember-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
             color: var(--text-muted);
-            margin-top: 0.3rem;
+            user-select: none;
         }
+
+        .remember-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            border-radius: 4px;
+            /* Override padding dari input global */
+            padding: 0;
+        }
+
+        .forgot-link {
+            font-size: 0.875rem;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover { color: #fff; }
 
         .btn-submit {
             width: 100%;
@@ -224,7 +256,6 @@
             font-weight: 600;
             font-family: 'Inter', sans-serif;
             cursor: pointer;
-            margin-top: 0.5rem;
             transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             box-shadow: 0 4px 15px rgba(99,102,241,0.35);
             letter-spacing: 0.2px;
@@ -286,9 +317,18 @@
         <span class="logo-text">{{ config('app.name') }}</span>
     </div>
 
-    <h1>Buat Akun Baru</h1>
-    <p class="subtitle">Isi data di bawah untuk mendaftar.</p>
+    <h1>Selamat Datang</h1>
+    <p class="subtitle">Masuk ke akun Anda untuk melanjutkan.</p>
 
+    {{-- Flash message sukses (misal setelah logout) --}}
+    @if (session('status'))
+        <div class="alert-success" role="alert">
+            <span>✔</span>
+            <span>{{ session('status') }}</span>
+        </div>
+    @endif
+
+    {{-- Error validasi --}}
     @if ($errors->any())
         <div class="alert-error" role="alert">
             <strong>Terdapat kesalahan:</strong>
@@ -300,29 +340,8 @@
         </div>
     @endif
 
-    <form id="registerForm" method="POST" action="{{ route('register.store') }}" novalidate>
+    <form id="loginForm" method="POST" action="{{ route('login.store') }}" novalidate>
         @csrf
-
-        {{-- Nama Lengkap --}}
-        <div class="form-group">
-            <label for="name">Nama Lengkap</label>
-            <div class="input-wrap">
-                <span class="input-icon">👤</span>
-                <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value="{{ old('name') }}"
-                    placeholder="Masukkan nama lengkap"
-                    autocomplete="name"
-                    class="{{ $errors->has('name') ? 'is-invalid' : '' }}"
-                    required
-                >
-            </div>
-            @error('name')
-                <p class="field-error">⚠ {{ $message }}</p>
-            @enderror
-        </div>
 
         {{-- Email --}}
         <div class="form-group">
@@ -338,6 +357,7 @@
                     autocomplete="email"
                     class="{{ $errors->has('email') ? 'is-invalid' : '' }}"
                     required
+                    autofocus
                 >
             </div>
             @error('email')
@@ -354,88 +374,47 @@
                     id="password"
                     type="password"
                     name="password"
-                    placeholder="Minimal 8 karakter"
-                    autocomplete="new-password"
+                    placeholder="Masukkan password Anda"
+                    autocomplete="current-password"
                     class="{{ $errors->has('password') ? 'is-invalid' : '' }}"
                     required
                 >
                 <button type="button" class="toggle-password" id="togglePassword" aria-label="Tampilkan password">👁</button>
             </div>
-            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-            <p class="strength-label" id="strengthLabel"></p>
             @error('password')
                 <p class="field-error">⚠ {{ $message }}</p>
             @enderror
         </div>
 
-        {{-- Konfirmasi Password --}}
-        <div class="form-group">
-            <label for="password_confirmation">Konfirmasi Password</label>
-            <div class="input-wrap">
-                <span class="input-icon">🔑</span>
-                <input
-                    id="password_confirmation"
-                    type="password"
-                    name="password_confirmation"
-                    placeholder="Ulangi password"
-                    autocomplete="new-password"
-                    required
-                >
-                <button type="button" class="toggle-password" id="toggleConfirm" aria-label="Tampilkan konfirmasi">👁</button>
-            </div>
+        {{-- Remember me & Lupa password --}}
+        <div class="form-row">
+            <label class="remember-label">
+                <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                Ingat saya
+            </label>
+            <a href="#" class="forgot-link">Lupa password?</a>
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn">
-            <span id="btnText">Daftar Sekarang</span>
+            <span id="btnText">Masuk</span>
             <div class="spinner" id="spinner"></div>
         </button>
     </form>
 
-    <p class="divider">Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a></p>
+    <p class="divider">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></p>
 </div>
 
 <script>
     // Toggle password visibility
-    function setupToggle(btnId, inputId) {
-        document.getElementById(btnId).addEventListener('click', function () {
-            const input = document.getElementById(inputId);
-            const isHidden = input.type === 'password';
-            input.type = isHidden ? 'text' : 'password';
-            this.textContent = isHidden ? '🙈' : '👁';
-        });
-    }
-    setupToggle('togglePassword', 'password');
-    setupToggle('toggleConfirm', 'password_confirmation');
-
-    // Password strength meter
-    const passwordInput = document.getElementById('password');
-    const fill = document.getElementById('strengthFill');
-    const label = document.getElementById('strengthLabel');
-
-    passwordInput.addEventListener('input', function () {
-        const val = this.value;
-        let score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-
-        const levels = [
-            { pct: '0%',   color: 'transparent', text: '' },
-            { pct: '25%',  color: '#ef4444',      text: 'Lemah' },
-            { pct: '50%',  color: '#f97316',      text: 'Cukup' },
-            { pct: '75%',  color: '#eab308',      text: 'Kuat' },
-            { pct: '100%', color: '#22c55e',       text: 'Sangat Kuat' },
-        ];
-
-        const lvl = val.length === 0 ? levels[0] : levels[score];
-        fill.style.width = lvl.pct;
-        fill.style.background = lvl.color;
-        label.textContent = lvl.text;
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const input = document.getElementById('password');
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? '🙈' : '👁';
     });
 
     // Submit loading state
-    document.getElementById('registerForm').addEventListener('submit', function () {
+    document.getElementById('loginForm').addEventListener('submit', function () {
         const btn = document.getElementById('submitBtn');
         document.getElementById('btnText').style.display = 'none';
         document.getElementById('spinner').style.display = 'block';
