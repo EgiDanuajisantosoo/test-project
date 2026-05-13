@@ -386,7 +386,7 @@
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn">
-            <span id="btnText">Daftar Sekarang</span>
+            <span id="btnText">Daftar Sekarang!</span>
             <div class="spinner" id="spinner"></div>
         </button>
     </form>
