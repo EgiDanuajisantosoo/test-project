@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class RegisterController extends Controller
@@ -28,7 +29,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => $request->password, // otomatis di-hash via cast 'hashed'
+            'password' => Hash::make($request->password),
         ]);
 
         event(new Registered($user));
