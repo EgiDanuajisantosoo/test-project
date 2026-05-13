@@ -29,4 +29,18 @@ class EmailVerificationController extends Controller
 
         return redirect()->route('register.success');
     }
+
+    /**
+     * Kirim ulang link verifikasi email.
+     */
+    public function resend(Request $request): RedirectResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('register.success');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'verification-link-sent');
+    }
 }
